@@ -7,6 +7,10 @@ import pygame
 import sys
 import warnings
 
+import keyboard
+from playsound import playsound
+
+
 
 def speedx(snd_array, factor):
     """ Speeds up / slows down a sound, by some factor. """
@@ -51,6 +55,19 @@ def pitchshift(snd_array, n, window_size=2**13, h=2**11):
     return speedx(stretched[window_size:], factor)
 
 
+def generate_npy(sound, npy_file):
+    from os.path import exists
+    tones = range(-6, 6)
+    if exists(npy_file):
+        notes = np.load(npy_file, allow_pickle=True)
+        print('Notes Loaded!')
+    else:
+        print("Generating notes...")
+        notes = np.array([pitchshift(sound, n) for n in tones])
+        np.save(npy_file, notes)
+        print('Notes Generated!')
+
+
 def parse_arguments():
     description = ('Use your computer keyboard as a "piano"')
 
@@ -65,8 +82,8 @@ def parse_arguments():
         '--keyboard', '-k',
         metavar='FILE',
         type=argparse.FileType('r'),
-        default='typewriter.kb',
-        help='keyboard file (default: typewriter.kb)')
+        default='keyboard.txt',
+        help='keyboard file (default: keyboard.txt)')
     parser.add_argument(
         '--verbose', '-v',
         action='store_true',
@@ -83,13 +100,9 @@ def main():
     if not args.verbose:
         warnings.simplefilter('ignore')
 
-    fps, sound = wavfile.read(args.wav.name)
+    fps, sound = wavfile.read('bowl.wav')
 
-    tones = range(-25, 25)
-    sys.stdout.write('Transponding sound file... ')
-    sys.stdout.flush()
-    transposed_sounds = [pitchshift(sound, n) for n in tones]
-    print('DONE')
+    transposed_sounds = generate_npy(sound, 'bowl.npy')
 
     # So flexible ;)
     pygame.mixer.init(fps, -16, 1, 2048)
@@ -106,6 +119,7 @@ def main():
 
         if event.type in (pygame.KEYDOWN, pygame.KEYUP):
             key = pygame.key.name(event.key)
+            print(key)
 
         if event.type == pygame.KEYDOWN:
             if (key in key_sound.keys()) and (not is_playing[key]):
@@ -126,4 +140,4 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('Goodbye')
+        print('Goodbye!')

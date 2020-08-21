@@ -2,12 +2,13 @@
 
 import pygame as pg
 
-kb_file = open("my_keyboard.kb", 'w')
+kb_file = open("keyboard.txt", 'w')
 
 pg.init()
 screen = pg.display.set_mode((200, 200))
-print("Press the keys in the right order. Press Escape to finish.")
-while True:
+
+print("Press the 12 main keys you will use. Press Escape to exit.")
+for i in range(24):
     event = pg.event.wait()
     if event.type is pg.KEYDOWN:
         if event.key == pg.K_ESCAPE:
