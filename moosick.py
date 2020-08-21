@@ -56,8 +56,9 @@ def pitchshift(snd_array, n, window_size=2**13, h=2**11):
 
 
 def generate_npy(sound, npy_file):
+
     from os.path import exists
-    tones = range(-6, 6)
+    tones = range(-28, 28)
     if exists(npy_file):
         notes = np.load(npy_file, allow_pickle=True)
         print('Notes Loaded!')
@@ -66,6 +67,8 @@ def generate_npy(sound, npy_file):
         notes = np.array([pitchshift(sound, n) for n in tones])
         np.save(npy_file, notes)
         print('Notes Generated!')
+
+    return notes
 
 
 def parse_arguments():
@@ -100,7 +103,8 @@ def main():
     if not args.verbose:
         warnings.simplefilter('ignore')
 
-    fps, sound = wavfile.read('bowl.wav')
+    fps, sound = wavfile.read(args.wav.name)
+    print(args.wav.name)
 
     transposed_sounds = generate_npy(sound, 'bowl.npy')
 
@@ -119,12 +123,27 @@ def main():
 
         if event.type in (pygame.KEYDOWN, pygame.KEYUP):
             key = pygame.key.name(event.key)
-            print(key)
 
         if event.type == pygame.KEYDOWN:
             if (key in key_sound.keys()) and (not is_playing[key]):
-                key_sound[key].play(fade_ms=50)
+                key_sound[key].play(fade_ms=10)
                 is_playing[key] = True
+
+                notes = {'j': 'C',
+                        'u': 'C#',
+                        '7': 'D',
+                        'k': 'D#',
+                        'i': 'E',
+                        '8': 'F',
+                        'l': 'F#',
+                        'o': 'G',
+                        '9': 'G#',
+                        ';': 'A',
+                        'p': 'A#',
+                        '0': 'B'
+                        }
+
+                print(notes[key])
 
             elif event.key == pygame.K_ESCAPE:
                 pygame.quit()
